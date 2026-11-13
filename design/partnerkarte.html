@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partnerkarte · JB Digital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<style>
+:root{
+  --bg:#F3F4F1;--surface:#FFFFFF;--surface2:#F3F4F1;--border:#E1E4DE;--border-strong:#C5CCC4;
+  --text:#16202A;--sub:#3C4651;--muted:#56606B;--link:#1D4ED8;--primary:#16202A;--on-primary:#FFFFFF;
+  --blue:#1D4ED8;--blue-soft:#DCE6FB;--blue-text:#1E3A8A;--orange:#E8710A;--orange-soft:#FDEBD9;--orange-text:#8A4A0B;
+  --green-soft:#DCF3E4;--green-text:#14632F;--gray-soft:#E7E9E5;--danger:#B42318;--danger-soft:#FDE8E6;--tip:#16202A;--tip-text:#FFFFFF;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E141A;--surface:#161F28;--surface2:#1D2833;--border:#26323E;--border-strong:#3A4855;
+    --text:#E7EBEF;--sub:#C3CBD3;--muted:#9AA5B1;--link:#8CB0FF;--primary:#E7EBEF;--on-primary:#0E141A;
+    --blue:#4F7DF0;--blue-soft:#1C2C4F;--blue-text:#B9CCFF;--orange:#F28A2E;--orange-soft:#3A2614;--orange-text:#FFC48F;
+    --green-soft:#15331F;--green-text:#8FE0A8;--gray-soft:#26323E;--danger:#FF8A80;--danger-soft:#3A1A18;--tip:#E7EBEF;--tip-text:#0E141A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E141A;--surface:#161F28;--surface2:#1D2833;--border:#26323E;--border-strong:#3A4855;
+  --text:#E7EBEF;--sub:#C3CBD3;--muted:#9AA5B1;--link:#8CB0FF;--primary:#E7EBEF;--on-primary:#0E141A;
+  --blue:#4F7DF0;--blue-soft:#1C2C4F;--blue-text:#B9CCFF;--orange:#F28A2E;--orange-soft:#3A2614;--orange-text:#FFC48F;
+  --green-soft:#15331F;--green-text:#8FE0A8;--gray-soft:#26323E;--danger:#FF8A80;--danger-soft:#3A1A18;--tip:#E7EBEF;--tip-text:#0E141A;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--link)}
+:focus-visible{outline:3px solid #4F7DF0;outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+h1,h2,h3{margin:0}
+.display{font-family:"Space Grotesk",Inter,sans-serif}
+
+header{display:flex;flex-wrap:wrap;align-items:center;gap:16px 20px;padding:16px 24px;background:var(--surface);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:12px;flex:1 1 220px}
+.logo{width:42px;height:42px;border-radius:10px;background:var(--primary);color:var(--on-primary);display:flex;align-items:center;justify-content:center;font-family:"Space Grotesk",sans-serif;font-weight:700}
+.brand small{display:block;color:var(--muted);font-size:13px}
+.search{flex:3 1 340px;display:flex;align-items:center;gap:10px;height:46px;padding:0 14px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface)}
+.search input{flex:1;min-width:0;border:0;outline:none;background:transparent;font-size:15px}
+.icon-btn{width:46px;height:46px;border:1px solid var(--border-strong);border-radius:12px;background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 16px;border-radius:12px;border:1px solid var(--border-strong);background:transparent;font-weight:600;font-size:14px;cursor:pointer}
+.btn-primary{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+.btn-blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-danger{background:var(--danger);color:var(--surface);border-color:var(--danger)}
+.btn-ghost-danger{border:0;color:var(--danger);padding:0 4px;align-self:flex-start}
+.btn-sm{min-height:38px;padding:0 12px;font-size:13px;border-radius:9px}
+
+.toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:14px 24px 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--border-strong);background:var(--surface);font-weight:600;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.chip[aria-pressed="true"]{background:var(--primary);color:var(--on-primary);border-color:var(--primary)}
+.chip .n{font-weight:500;opacity:.8}
+.dot{width:10px;height:10px;flex:none;border-radius:50%;background:var(--blue)}
+.dot.f{border-radius:2px;background:var(--orange);transform:rotate(45deg)}
+.dot.all{background:currentColor}
+select.inp,input.inp,textarea.inp{height:44px;padding:0 12px;border:1px solid var(--border-strong);border-radius:10px;background:var(--surface);font-size:14px;width:100%}
+textarea.inp{height:auto;padding:10px 12px;resize:vertical}
+.stats{margin-left:auto;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--muted)}
+.stats b{color:var(--text)}
+
+main{display:flex;flex-wrap:wrap;gap:20px;padding:16px 24px 32px;align-items:flex-start}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:16px}
+#listPanel{flex:1 1 290px;min-width:0;padding:14px;display:flex;flex-direction:column}
+#mapCol{flex:999 1 520px;min-width:0}
+#detailCol{flex:1 1 340px;min-width:0}
+.list-head{display:flex;justify-content:space-between;align-items:baseline;padding:0 4px 10px}
+.list-head span{font-size:13px;color:var(--muted)}
+#list{display:flex;flex-direction:column;gap:8px;max-height:700px;overflow-y:auto}
+.item{display:flex;align-items:center;gap:12px;width:100%;min-height:58px;padding:10px 12px;text-align:left;border-radius:12px;border:1px solid var(--border);background:var(--surface);cursor:pointer}
+.item[aria-current="true"]{border-color:var(--text);background:var(--surface2)}
+.item .t{flex:1;min-width:0;display:flex;flex-direction:column}
+.item .t b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t span{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badge{flex:none;font-size:12px;font-weight:600;padding:3px 8px;border-radius:999px}
+.b-free{background:var(--green-soft);color:var(--green-text)}
+.b-full{background:var(--gray-soft);color:var(--sub)}
+.b-p{background:var(--blue-soft);color:var(--blue-text)}
+.list-foot{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.list-foot .acts{display:flex;gap:6px;flex-wrap:wrap}
+
+#mapWrap{position:relative;height:min(78vh,760px);min-height:420px;border-radius:16px;overflow:hidden;border:1px solid var(--border)}
+#map{position:absolute;inset:0;background:var(--surface2)}
+.dark-map .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.95) contrast(.88) saturate(.7)}
+.leaflet-container{font-family:Inter,system-ui,sans-serif}
+.leaflet-control-zoom a,.leaflet-bar a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important;width:40px!important;height:40px!important;line-height:40px!important}
+.leaflet-control-attribution{background:color-mix(in srgb,var(--surface) 85%,transparent)!important;color:var(--muted)!important}
+.leaflet-control-attribution a{color:var(--link)!important}
+#placeBanner{position:absolute;top:12px;left:60px;right:12px;z-index:900;padding:10px 14px;border-radius:10px;background:var(--blue);color:#fff;font-size:13px;font-weight:600;display:none}
+.placing #placeBanner{display:block}
+.placing #map{cursor:crosshair}
+.legend{position:absolute;left:12px;bottom:28px;z-index:800;display:flex;flex-wrap:wrap;gap:6px 14px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;font-size:12px;color:var(--sub)}
+.legend span{display:flex;align-items:center;gap:6px}
+.ring{width:12px;height:12px;border-radius:3px;border:3px solid var(--blue);transform:rotate(45deg)}
+#hint{margin-top:10px;font-size:13px;color:var(--muted);min-height:1em}
+
+.pin{position:relative;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.pin i{display:block;width:17px;height:17px;background:var(--orange);border:3px solid #fff;border-radius:4px;transform:rotate(45deg);box-shadow:0 2px 5px rgba(0,0,0,.35);transition:all .15s}
+.pin.hi i{width:22px;height:22px;box-shadow:0 0 0 4px var(--blue),0 4px 10px rgba(0,0,0,.3)}
+.pin.sel i{width:25px;height:25px;box-shadow:0 0 0 5px rgba(232,113,10,.4),0 4px 10px rgba(0,0,0,.35)}
+.pin.dim{opacity:.35}
+.pin .lbl{display:none;position:absolute;top:42px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:4px 10px;border-radius:8px;background:var(--tip);color:var(--tip-text);font-size:12px;font-weight:600}
+.pin.sel .lbl,.pin.hi .lbl{display:block}
+.draft-pin{width:26px;height:26px;border-radius:50%;border:3px solid var(--blue);background:var(--blue-soft);box-shadow:0 0 0 6px rgba(79,125,240,.25)}
+
+.card{display:flex;flex-direction:column;gap:18px;padding:22px}
+.kind{font-size:12px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:4px 10px;border-radius:999px}
+.k-f{background:var(--orange-soft);color:var(--orange-text)}
+.k-p{background:var(--blue-soft);color:var(--blue-text)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.muted{color:var(--muted)}
+.facts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.facts div{padding:10px 12px;border-radius:10px;background:var(--surface2)}
+.facts small{display:block;font-size:12px;color:var(--muted)}
+.facts b{font-size:14px}
+.links{display:flex;flex-direction:column;gap:8px}
+.link{display:flex;align-items:center;gap:10px;min-height:48px;padding:8px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface);text-align:left;cursor:pointer}
+.link .t{flex:1;min-width:0;display:flex;flex-direction:column}
+.link .t span{font-size:12px;color:var(--muted)}
+.empty{font-size:13px;color:var(--muted);padding:10px 12px;border:1px dashed var(--border-strong);border-radius:10px}
+.contact{display:flex;flex-direction:column;gap:8px;padding:16px;border-radius:12px;background:var(--surface2)}
+.contact a{display:flex;align-items:center;gap:10px;min-height:32px;text-decoration:none;font-size:14px}
+.placeholder{padding:28px;text-align:center;color:var(--muted);font-size:14px;border:1px dashed var(--border-strong);border-radius:16px;background:var(--surface)}
+
+form.card{gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--sub)}
+.two{display:flex;flex-wrap:wrap;gap:12px}
+.two>*{flex:1 1 140px}
+fieldset{margin:0;padding:10px 12px;border:1px solid var(--border);border-radius:10px;display:flex;flex-direction:column;gap:2px;max-height:260px;overflow-y:auto}
+legend{padding:0 6px;font-size:13px;font-weight:600;color:var(--sub)}
+.check{display:flex;align-items:center;gap:10px;min-height:40px;font-size:14px;cursor:pointer}
+.check input{width:18px;height:18px;accent-color:var(--blue)}
+.posbox{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-radius:10px;background:var(--surface2);font-size:13px}
+.err{font-size:13px;color:var(--danger)}
+.confirm{display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:10px;background:var(--danger-soft);font-size:13px}
+hr{border:0;border-top:1px solid var(--border);margin:4px 0}
+@media (max-width:640px){header,.toolbar,main{padding-left:16px;padding-right:16px}.stats{margin-left:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true">JB</div>
+    <div><div class="display" style="font-weight:700;font-size:20px;line-height:1.2">Partnerkarte</div><small>JB Digital · Kreis Gütersloh</small></div>
+  </div>
+  <label class="search">
+    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--muted)"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    <span class="sr">Suche</span>
+    <input id="q" type="search" placeholder="Werbetreibende, Werbeflächen, Orte oder Ansprechpartner suchen …">
+  </label>
+  <button id="themeBtn" class="icon-btn" type="button" aria-label="Darstellung wechseln"></button>
+  <button id="addBtn" class="btn btn-primary" type="button" style="height:46px">
+    <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    Neu hinzufügen
+  </button>
+</header>
+
+<div class="toolbar">
+  <div class="chips" role="group" aria-label="Liste filtern" id="chips"></div>
+  <label style="display:flex;align-items:center;gap:8px;font-size:14px;color:var(--sub)">Ort
+    <select id="town" class="inp" style="width:auto"></select>
+  </label>
+  <div class="stats" id="stats"></div>
+</div>
+
+<main>
+  <section id="listPanel" class="panel" aria-label="Ergebnisliste">
+    <div class="list-head"><h2 class="display" style="font-size:17px">Ergebnisse</h2><span id="count"></span></div>
+    <div id="list"></div>
+    <div class="list-foot">
+      <span id="storeInfo">Änderungen werden in diesem Browser gespeichert.</span>
+      <div class="acts">
+        <button class="btn btn-sm" type="button" id="exportBtn">Export</button>
+        <button class="btn btn-sm" type="button" id="importBtn">Import</button>
+        <input type="file" id="importFile" accept="application/json,.json" hidden>
+      </div>
+    </div>
+  </section>
+
+  <section id="mapCol" aria-label="Karte">
+    <div id="mapWrap">
+      <div id="map"></div>
+      <div id="placeBanner" role="status">Auf die Karte klicken, um den Standort zu setzen.</div>
+      <div class="legend">
+        <span><i class="dot f" aria-hidden="true"></i>Werbefläche</span>
+        <span><i class="ring" aria-hidden="true"></i>Fläche des gewählten Partners</span>
+      </div>
+    </div>
+    <div id="hint" aria-live="polite"></div>
+  </section>
+
+  <aside id="detailCol" aria-label="Details"></aside>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script>
+(function(){
+'use strict';
+var STORE_KEY='jb-partnerkarte-data-v1', THEME_KEY='jb-partnerkarte-theme';
+var KREIS_BOUNDS=[[51.74,8.06],[52.13,8.70]];
+var TOWNS={
+  'Borgholzhausen':{lat:52.100,lng:8.300,plz:'33829'},
+  'Gütersloh':{lat:51.906,lng:8.378,plz:'33330'},
+  'Halle (Westf.)':{lat:52.060,lng:8.360,plz:'33790'},
+  'Harsewinkel':{lat:51.962,lng:8.230,plz:'33428'},
+  'Herzebrock-Clarholz':{lat:51.882,lng:8.230,plz:'33442'},
+  'Langenberg':{lat:51.776,lng:8.317,plz:'33449'},
+  'Rheda-Wiedenbrück':{lat:51.848,lng:8.300,plz:'33378'},
+  'Rietberg':{lat:51.800,lng:8.428,plz:'33397'},
+  'Schloß Holte-Stukenbrock':{lat:51.883,lng:8.617,plz:'33758'},
+  'Steinhagen':{lat:52.008,lng:8.413,plz:'33803'},
+  'Verl':{lat:51.883,lng:8.517,plz:'33415'},
+  'Versmold':{lat:52.041,lng:8.152,plz:'33775'},
+  'Werther (Westf.)':{lat:52.077,lng:8.413,plz:'33824'}
+};
+var SEED=[
+  {id:'p1',kind:'partner',name:'Bäckerei Muster',category:'Bäckerei & Café',town:'Gütersloh',street:'Musterstraße 12',person:'Anna Beispiel',role:'Inhaberin',phone:'05241 123456',email:'info@baeckerei-muster.de',web:'www.baeckerei-muster.de',note:'Kampagne Frühstücksangebot bis Ende Dezember.'},
+  {id:'p2',kind:'partner',name:'Autohaus Beispiel',category:'Automobil',town:'Rheda-Wiedenbrück',street:'Industriestraße 4',person:'Thomas Muster',role:'Marketing',phone:'05242 123456',email:'marketing@autohaus-beispiel.de',web:'www.autohaus-beispiel.de',note:''},
+  {id:'p3',kind:'partner',name:'Fitnessstudio Muster',category:'Sport & Gesundheit',town:'Verl',street:'Sportweg 8',person:'Lena Beispiel',role:'Geschäftsführung',phone:'05246 123456',email:'kontakt@fitness-muster.de',web:'www.fitness-muster.de',note:'Interesse an weiterer Fläche in Gütersloh.'},
+  {id:'p4',kind:'partner',name:'Modehaus Beispiel',category:'Einzelhandel · Mode',town:'Gütersloh',street:'Marktplatz 3',person:'Sabine Muster',role:'Filialleitung',phone:'05241 654321',email:'filiale@modehaus-beispiel.de',web:'www.modehaus-beispiel.de',note:''},
+  {id:'p5',kind:'partner',name:'Gasthof Muster',category:'Gastronomie',town:'Harsewinkel',street:'Dorfstraße 21',person:'Peter Beispiel',role:'Inhaber',phone:'05247 123456',email:'gasthof@muster.de',web:'www.gasthof-muster.de',note:'Angebot für Litfaßsäule Harsewinkel offen.'},
+  {id:'p6',kind:'partner',name:'Optik Beispiel',category:'Einzelhandel · Optik',town:'Halle (Westf.)',street:'Lange Straße 15',person:'Jana Muster',role:'Inhaberin',phone:'05201 123456',email:'info@optik-beispiel.de',web:'www.optik-beispiel.de',note:''},
+  {id:'p7',kind:'partner',name:'Steuerbüro Muster',category:'Dienstleistung',town:'Rietberg',street:'Rathausstraße 2',person:'Michael Beispiel',role:'Partner',phone:'05244 123456',email:'kanzlei@steuer-muster.de',web:'www.steuer-muster.de',note:''},
+  {id:'p8',kind:'partner',name:'Blumen Beispiel',category:'Einzelhandel · Floristik',town:'Steinhagen',street:'Am Markt 7',person:'Claudia Muster',role:'Inhaberin',phone:'05204 123456',email:'hallo@blumen-beispiel.de',web:'www.blumen-beispiel.de',note:''},
+  {id:'f1',kind:'flaeche',name:'Display Innenstadt Gütersloh',category:'Digitales Display, innen',town:'Gütersloh',street:'Berliner Straße 20',lat:51.9070,lng:8.3800,format:'Display 55"',slots:6,advertisers:['p1','p4','p3'],person:'Max Mustermann',role:'Standortinhaber',phone:'05241 111222',email:'standort@beispiel.de',web:'www.beispiel.de',note:'Hohe Laufkundschaft, Schaufensterfront.'},
+  {id:'f9',kind:'flaeche',name:'Display Gütersloh Nord',category:'Digitales Display, innen',town:'Gütersloh',street:'Verler Straße 40',lat:51.9135,lng:8.3925,format:'Display 43"',slots:4,advertisers:['p4'],person:'Erika Musterfrau',role:'Standortinhaberin',phone:'05241 333444',email:'nord@beispiel.de',web:'www.beispiel.de',note:''},
+  {id:'f2',kind:'flaeche',name:'Display Bahnhof Rheda',category:'Digitales Display, außen',town:'Rheda-Wiedenbrück',street:'Bahnhofstraße 1',lat:51.8510,lng:8.2980,format:'Display 75"',slots:4,advertisers:['p2'],person:'Erika Musterfrau',role:'Standortinhaberin',phone:'05242 111222',email:'bahnhof@beispiel.de',web:'www.beispiel.de',note:''},
+  {id:'f3',kind:'flaeche',name:'Display Einkaufszentrum Verl',category:'Digitales Display, innen',town:'Verl',street:'Hauptstraße 30',lat:51.8840,lng:8.5150,format:'Display 55"',slots:6,advertisers:['p3','p7'],person:'Max Mustermann',role:'Centermanagement',phone:'05246 111222',email:'center@beispiel.de',web:'www.beispiel.de',note:''},
+  {id:'f4',kind:'flaeche',name:'Litfaßsäule Harsewinkel',category:'Plakatfläche',town:'Harsewinkel',street:'Münsterstraße 5',lat:51.9630,lng:8.2290,format:'Plakat A0',slots:2,advertisers:[],person:'Erika Musterfrau',role:'Stadtmarketing',phone:'05247 111222',email:'plakat@beispiel.de',web:'www.beispiel.de',note:''},
+  {id:'f5',kind:'flaeche',name:'Display Halle Zentrum',category:'Digitales Display, innen',town:'Halle (Westf.)',street:'Kirchplatz 9',lat:52.0600,lng:8.3620,format:'Display 43"',slots:4,advertisers:['p6','p8'],person:'Max Mustermann',role:'Standortinhaber',phone:'05201 111222',email:'halle@beispiel.de',web:'www.beispiel.de',note:''},
+  {id:'f6',kind:'flaeche',name:'Display Schloß Holte',category:'Digitales Display, außen',town:'Schloß Holte-Stukenbrock',street:'Holter Straße 50',lat:51.8840,lng:8.6150,format:'Display 75"',slots:4,advertisers:[],person:'Erika Musterfrau',role:'Standortinhaberin',phone:'05207 111222',email:'shs@beispiel.de',web:'www.beispiel.de',note:'Neu im Netz – noch komplett frei.'},
+  {id:'f7',kind:'flaeche',name:'Display Marktplatz Rietberg',category:'Digitales Display, innen',town:'Rietberg',street:'Marktplatz 1',lat:51.8010,lng:8.4290,format:'Display 55"',slots:6,advertisers:['p7','p1'],person:'Max Mustermann',role:'Standortinhaber',phone:'05244 111222',email:'rietberg@beispiel.de',web:'www.beispiel.de',note:''},
+  {id:'f8',kind:'flaeche',name:'Display Versmold Mitte',category:'Digitales Display, innen',town:'Versmold',street:'Münsterstraße 18',lat:52.0420,lng:8.1530,format:'Display 43"',slots:4,advertisers:[],person:'Erika Musterfrau',role:'Standortinhaberin',phone:'05423 111222',email:'versmold@beispiel.de',web:'www.beispiel.de',note:''},
+  {id:'f10',kind:'flaeche',name:'Display Steinhagen Ortsmitte',category:'Digitales Display, innen',town:'Steinhagen',street:'Bahnhofstraße 12',lat:52.0090,lng:8.4150,format:'Display 43"',slots:4,advertisers:['p8'],person:'Max Mustermann',role:'Standortinhaber',phone:'05204 111222',email:'steinhagen@beispiel.de',web:'www.beispiel.de',note:''}
+];
+
+// ---------- State ----------
+var S={entries:load(),q:'',kind:'all',town:'all',selected:'f1',mode:'view',draft:null,placing:false,askDelete:false,error:'',geoMsg:''};
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function load(){try{var r=localStorage.getItem(STORE_KEY);if(r){var d=JSON.parse(r);if(Array.isArray(d))return d;}}catch(e){}return clone(SEED);}
+function persist(){try{localStorage.setItem(STORE_KEY,JSON.stringify(S.entries));}catch(e){document.getElementById('storeInfo').textContent='Speichern im Browser nicht möglich – bitte exportieren.';}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function byId(id){for(var i=0;i<S.entries.length;i++)if(S.entries[i].id===id)return S.entries[i];return null;}
+function partners(){return S.entries.filter(function(e){return e.kind==='partner';});}
+function flaechen(){return S.entries.filter(function(e){return e.kind==='flaeche';});}
+function flaechenOf(pid){return flaechen().filter(function(f){return (f.advertisers||[]).indexOf(pid)!==-1;});}
+function used(f){return (f.advertisers||[]).length;}
+function sortDe(a,b){return a.name.localeCompare(b.name,'de');}
+function matchesQ(e){
+  var q=S.q.trim().toLowerCase(); if(!q)return true;
+  var rel=e.kind==='flaeche'?(e.advertisers||[]).map(function(id){var p=byId(id);return p?p.name:'';}).join(' '):flaechenOf(e.id).map(function(f){return f.name;}).join(' ');
+  return [e.name,e.category,e.town,e.street,e.person,e.role,e.email,e.format,e.note,rel].join(' ').toLowerCase().indexOf(q)!==-1;
+}
+function matchesTown(e){return S.town==='all'||e.town===S.town;}
+
+// ---------- Theme ----------
+var root=document.documentElement;
+function currentTheme(){var t=root.getAttribute('data-theme');if(t)return t;return window.matchMedia&&matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}
+function applyTheme(){
+  var dark=currentTheme()==='dark';
+  document.getElementById('mapWrap').classList.toggle('dark-map',dark);
+  var b=document.getElementById('themeBtn');
+  b.setAttribute('aria-label',dark?'Zum hellen Modus wechseln':'Zum dunklen Modus wechseln');
+  b.title=b.getAttribute('aria-label');
+  b.innerHTML=dark
+    ?'<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>'
+    :'<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/></svg>';
+}
+try{var st=localStorage.getItem(THEME_KEY);if(st==='dark'||st==='light')root.setAttribute('data-theme',st);}catch(e){}
+document.getElementById('themeBtn').addEventListener('click',function(){
+  var next=currentTheme()==='dark'?'light':'dark';root.setAttribute('data-theme',next);
+  try{localStorage.setItem(THEME_KEY,next);}catch(e){} applyTheme();
+});
+if(window.matchMedia)matchMedia('(prefers-color-scheme: dark)').addEventListener('change',applyTheme);
+
+// ---------- Map ----------
+var map=L.map('map',{zoomControl:true,minZoom:9,maxZoom:19}).fitBounds(KREIS_BOUNDS);
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende'}).addTo(map);
+var markerLayer=L.layerGroup().addTo(map);
+var draftMarker=null;
+map.on('click',function(ev){
+  if(!S.placing||!S.draft)return;
+  S.draft.lat=+ev.latlng.lat.toFixed(6);S.draft.lng=+ev.latlng.lng.toFixed(6);S.draft.posSet=true;S.placing=false;S.geoMsg='Standort per Klick gesetzt.';
+  render();
+});
+
+function renderMap(){
+  markerLayer.clearLayers();
+  var sel=byId(S.selected); var selP=sel&&sel.kind==='partner'?sel:null;
+  var hi=selP?flaechenOf(selP.id).map(function(f){return f.id;}):[];
+  var q=S.q.trim();
+  flaechen().filter(matchesTown).forEach(function(f){
+    if(f.lat==null||f.lng==null)return;
+    var cls='pin'+(f.id===S.selected?' sel':'')+(hi.indexOf(f.id)!==-1?' hi':'')+(((selP&&hi.indexOf(f.id)===-1)||(!selP&&q&&!matchesQ(f)))?' dim':'');
+    var icon=L.divIcon({className:'',html:'<div class="'+cls+'"><i></i><span class="lbl">'+esc(f.name)+'</span></div>',iconSize:[44,44],iconAnchor:[22,22]});
+    var m=L.marker([f.lat,f.lng],{icon:icon,title:f.name,alt:'Werbefläche: '+f.name,keyboard:true,riseOnHover:true,zIndexOffset:f.id===S.selected?1000:(hi.indexOf(f.id)!==-1?500:0)});
+    m.on('click',function(){if(S.placing)return;select(f.id,false);});
+    m.on('keypress',function(e){if(e.originalEvent.key==='Enter'){select(f.id,false);}});
+    markerLayer.addLayer(m);
+  });
+  if(draftMarker){map.removeLayer(draftMarker);draftMarker=null;}
+  if(S.mode!=='view'&&S.draft&&S.draft.kind==='flaeche'&&S.draft.lat!=null){
+    draftMarker=L.marker([S.draft.lat,S.draft.lng],{icon:L.divIcon({className:'',html:'<div class="draft-pin"></div>',iconSize:[26,26],iconAnchor:[13,13]}),interactive:false}).addTo(map);
+  }
+  document.getElementById('mapWrap').classList.toggle('placing',S.placing);
+  var hint=document.getElementById('hint');
+  hint.textContent=selP?(hi.length?'Blau markiert: '+hi.length+' Werbefläche'+(hi.length===1?'':'n')+', auf denen '+selP.name+' wirbt.':selP.name+' hat noch keine Werbefläche gebucht.'):'';
+}
+
+function select(id,fly){
+  S.selected=id;S.mode='view';S.placing=false;S.askDelete=false;
+  render();
+  var e=byId(id); if(!e)return;
+  if(e.kind==='flaeche'&&e.lat!=null){ if(fly!==false||!map.getBounds().contains([e.lat,e.lng]))map.flyTo([e.lat,e.lng],Math.max(map.getZoom(),14),{duration:.6}); }
+  else if(e.kind==='partner'){var fs=flaechenOf(e.id).filter(function(f){return f.lat!=null;});if(fs.length){var b=L.latLngBounds(fs.map(function(f){return [f.lat,f.lng];}));map.flyToBounds(b.pad(0.4),{maxZoom:14,duration:.6});}}
+}
+
+// ---------- Toolbar ----------
+var townSel=document.getElementById('town');
+townSel.innerHTML='<option value="all">Alle Orte</option>'+Object.keys(TOWNS).map(function(t){return '<option>'+esc(t)+'</option>';}).join('');
+townSel.addEventListener('change',function(){S.town=townSel.value;render();if(S.town==='all')map.flyToBounds(KREIS_BOUNDS,{duration:.6});else{var t=TOWNS[S.town];map.flyTo([t.lat,t.lng],13,{duration:.6});}});
+document.getElementById('q').addEventListener('input',function(e){S.q=e.target.value;render();});
+document.getElementById('addBtn').addEventListener('click',function(){
+  S.draft=blank(S.kind==='partner'?'partner':'flaeche');if(S.town!=='all')S.draft.town=S.town;
+  S.mode='new';S.error='';S.geoMsg='';S.askDelete=false;S.placing=false;render();
+  var n=document.getElementById('d_name');if(n)n.focus();
+});
+
+function renderToolbar(){
+  var defs=[['all','Alle',S.entries.length,'all'],['flaeche','Werbeflächen',flaechen().length,'f'],['partner','Werbepartner',partners().length,'p']];
+  document.getElementById('chips').innerHTML=defs.map(function(d){return '<button type="button" class="chip" data-kind="'+d[0]+'" aria-pressed="'+(S.kind===d[0])+'"><i class="dot '+d[3]+'" aria-hidden="true"></i>'+d[1]+' <span class="n">'+d[2]+'</span></button>';}).join('');
+  var free=flaechen().filter(function(f){return f.slots-used(f)>0;}).length;
+  document.getElementById('stats').innerHTML='<span><b>'+partners().length+'</b> Werbepartner</span><span><b>'+flaechen().length+'</b> Werbeflächen</span><span><b>'+free+'</b> mit freien Slots</span>';
+}
+document.getElementById('chips').addEventListener('click',function(e){var b=e.target.closest('.chip');if(!b)return;S.kind=b.getAttribute('data-kind');render();});
+
+// ---------- List ----------
+function renderList(){
+  var items=S.entries.filter(function(e){return (S.kind==='all'||e.kind===S.kind)&&matchesTown(e)&&matchesQ(e);})
+    .sort(function(a,b){return a.kind!==b.kind?(a.kind==='flaeche'?-1:1):sortDe(a,b);});
+  document.getElementById('count').textContent=items.length+(items.length===1?' Eintrag':' Einträge');
+  document.getElementById('list').innerHTML=items.length?items.map(function(e){
+    var isF=e.kind==='flaeche',badge;
+    if(isF){var fr=e.slots-used(e);badge=fr<=0?'<span class="badge b-full">ausgebucht</span>':'<span class="badge b-free">'+fr+' frei</span>';}
+    else{var n=flaechenOf(e.id).length;badge='<span class="badge b-p">'+n+(n===1?' Fläche':' Flächen')+'</span>';}
+    return '<button type="button" class="item" data-id="'+esc(e.id)+'" aria-current="'+(e.id===S.selected)+'"><i class="dot'+(isF?' f':'')+'" aria-hidden="true"></i><span class="t"><b>'+esc(e.name)+'</b><span>'+esc((e.category||'–')+' · '+e.town)+'</span></span>'+badge+'</button>';
+  }).join(''):'<div class="empty" style="text-align:center">Keine Treffer. Suche oder Filter anpassen.</div>';
+}
+document.getElementById('list').addEventListener('click',function(e){var b=e.target.closest('.item');if(b)select(b.getAttribute('data-id'),true);});
+
+// ---------- Detail ----------
+var ICON={
+  pin:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;color:var(--muted)"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>',
+  tel:'<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>',
+  mail:'<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>',
+  web:'<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>',
+  edit:'<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>',
+  x:'<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  chev:'<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="color:var(--muted)"><path d="M9 6l6 6-6 6"/></svg>'
+};
+function renderDetail(){
+  var col=document.getElementById('detailCol');
+  if(S.mode!=='view'){col.innerHTML=formHtml();bindForm();return;}
+  var e=byId(S.selected);
+  if(!e){col.innerHTML='<div class="placeholder">Werbefläche auf der Karte oder einen Eintrag in der Liste anklicken, um Details und Kontaktdaten zu sehen.</div>';return;}
+  var isF=e.kind==='flaeche',t=TOWNS[e.town]||{plz:''};
+  var links=isF?(e.advertisers||[]).map(byId).filter(Boolean).map(function(p){return '<button type="button" class="link" data-id="'+esc(p.id)+'"><i class="dot" aria-hidden="true"></i><span class="t"><b>'+esc(p.name)+'</b><span>'+esc((p.category||'')+' · '+p.town)+'</span></span>'+ICON.chev+'</button>';})
+    :flaechenOf(e.id).map(function(f){return '<button type="button" class="link" data-id="'+esc(f.id)+'"><i class="dot f" aria-hidden="true"></i><span class="t"><b>'+esc(f.name)+'</b><span>'+esc((f.format||'')+' · '+f.town)+'</span></span>'+ICON.chev+'</button>';});
+  var facts='';
+  if(isF){var u=used(e),fr=e.slots-u;var stt=fr<0?'Überbucht':fr===0?'Ausgebucht':u===0?'Komplett frei':fr+' frei';var col2=fr<0?'var(--danger)':fr===0?'var(--sub)':'var(--green-text)';
+    facts='<div class="facts"><div><small>Format</small><b>'+esc(e.format||'–')+'</b></div><div><small>Belegung</small><b>'+u+' / '+e.slots+'</b></div><div><small>Status</small><b style="color:'+col2+'">'+stt+'</b></div></div>';}
+  var web=e.web||'',webHref=web?(/^https?:/.test(web)?web:'https://'+web):'';
+  var maps='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent((e.street||'')+', '+t.plz+' '+e.town);
+  col.innerHTML='<article class="panel card">'
+    +'<div style="display:flex;flex-direction:column;gap:8px"><div class="row"><span class="kind '+(isF?'k-f':'k-p')+'">'+(isF?'Werbefläche':'Werbepartner')+'</span><button type="button" class="btn btn-sm" id="editBtn">'+ICON.edit+'Bearbeiten</button></div>'
+    +'<h2 class="display" style="font-size:24px;line-height:1.2">'+esc(e.name)+'</h2><div class="muted" style="font-size:14px">'+esc(e.category||'–')+'</div></div>'
+    +'<div style="display:flex;gap:10px;align-items:flex-start">'+ICON.pin+'<div style="display:flex;flex-direction:column;gap:2px;font-size:14px"><span>'+esc(e.street||'–')+'</span><span>'+esc((t.plz?t.plz+' ':'')+e.town)+'</span><a href="'+esc(maps)+'" target="_blank" rel="noopener" style="font-size:13px;font-weight:600">In Google Maps öffnen</a></div></div>'
+    +facts
+    +'<div class="links"><h3 style="font-size:14px">'+(isF?'Wer wirbt hier':'Wirbt auf diesen Werbeflächen')+'</h3>'+(links.length?links.join(''):'<div class="empty">'+(isF?'Aktuell keine Buchungen – Fläche ist frei.':'Noch keine Werbefläche gebucht.')+'</div>')+'</div>'
+    +'<div class="contact"><h3 style="font-size:14px">Kontakt</h3><div style="font-size:14px"><b>'+esc(e.person||'–')+'</b><span class="muted"> · '+esc(e.role||(isF?'Standort':'Kontakt'))+'</span></div>'
+    +(e.phone?'<a href="tel:'+esc(e.phone.replace(/[^0-9+]/g,''))+'">'+ICON.tel+esc(e.phone)+'</a>':'')
+    +(e.email?'<a href="mailto:'+esc(e.email)+'">'+ICON.mail+esc(e.email)+'</a>':'')
+    +(web?'<a href="'+esc(webHref)+'" target="_blank" rel="noopener">'+ICON.web+esc(web)+'</a>':'')+'</div>'
+    +(e.note?'<div style="font-size:13px;color:var(--sub);white-space:pre-line"><b>Notiz:</b> '+esc(e.note)+'</div>':'')
+    +'</article>';
+  document.getElementById('editBtn').addEventListener('click',openEdit);
+  col.querySelectorAll('.link').forEach(function(b){b.addEventListener('click',function(){select(b.getAttribute('data-id'),true);});});
+}
+
+// ---------- Form ----------
+function blank(kind){return {id:null,kind:kind,name:'',category:'',town:'Gütersloh',street:'',format:'',slots:4,person:'',role:'',phone:'',email:'',web:'',note:'',lat:null,lng:null,posSet:false,advertisers:[],flaechenIds:[]};}
+function openEdit(){
+  var e=byId(S.selected);if(!e)return;
+  var d=Object.assign(blank(e.kind),clone(e));d.posSet=e.lat!=null;d.advertisers=(e.advertisers||[]).slice();
+  d.flaechenIds=e.kind==='partner'?flaechenOf(e.id).map(function(f){return f.id;}):[];
+  S.draft=d;S.mode='edit';S.error='';S.geoMsg='';S.askDelete=false;S.placing=false;render();
+}
+function inp(id,label,val,extra){return '<label class="f">'+label+'<input class="inp" id="'+id+'" value="'+esc(val)+'" '+(extra||'')+'></label>';}
+function formHtml(){
+  var d=S.draft,isF=d.kind==='flaeche';
+  var opts=isF?partners().sort(sortDe).map(function(p){return [p.id,p.name,p.town,d.advertisers.indexOf(p.id)!==-1];})
+              :flaechen().sort(sortDe).map(function(f){return [f.id,f.name,f.town,d.flaechenIds.indexOf(f.id)!==-1];});
+  var towns=Object.keys(TOWNS).map(function(t){return '<option'+(t===d.town?' selected':'')+'>'+esc(t)+'</option>';}).join('');
+  return '<form class="panel card" id="form" novalidate>'
+   +'<div class="row"><h2 class="display" style="font-size:19px">'+(S.mode==='new'?'Neuer Eintrag':'Eintrag bearbeiten')+'</h2><button type="button" class="icon-btn" id="closeForm" aria-label="Formular schließen" style="width:44px;height:44px">'+ICON.x+'</button></div>'
+   +(S.mode==='new'?'<label class="f">Typ<select class="inp" id="d_kind"><option value="flaeche"'+(isF?' selected':'')+'>Werbefläche (Standort)</option><option value="partner"'+(!isF?' selected':'')+'>Werbepartner (Kunde)</option></select></label>':'')
+   +inp('d_name','Name *',d.name,'placeholder="'+(isF?'z. B. Display Marktplatz':'z. B. Café am Markt')+'" required')
+   +inp('d_category',isF?'Art der Fläche':'Branche',d.category)
+   +'<div class="two"><label class="f">Ort<select class="inp" id="d_town">'+towns+'</select></label>'+inp('d_street','Straße &amp; Nr.',d.street)+'</div>'
+   +(isF?'<div class="two">'+inp('d_format','Format',d.format,'placeholder="z. B. Display 55 Zoll"')+inp('d_slots','Slots',d.slots,'type="number" min="1" max="50"')+'</div>'
+     +'<div class="posbox"><span>Standort: <b>'+(d.lat!=null?d.lat.toFixed(5)+', '+d.lng.toFixed(5):'noch nicht gesetzt')+'</b>'+(S.geoMsg?'<br><span class="muted">'+esc(S.geoMsg)+'</span>':'')+'</span><span style="display:flex;gap:6px;flex-wrap:wrap"><button type="button" class="btn btn-sm" id="geoBtn">Adresse suchen</button><button type="button" class="btn btn-sm" id="placeBtn">'+(S.placing?'Abbrechen':'Auf Karte klicken')+'</button></span></div>':'')
+   +'<fieldset><legend>'+(isF?'Wer wirbt auf dieser Fläche':'Gebuchte Werbeflächen')+'</legend>'
+     +(opts.length?opts.map(function(o){return '<label class="check"><input type="checkbox" class="rel" value="'+esc(o[0])+'"'+(o[3]?' checked':'')+'><span>'+esc(o[1])+' <span class="muted" style="font-size:12px">· '+esc(o[2])+'</span></span></label>';}).join(''):'<span class="muted" style="font-size:13px">'+(isF?'Noch keine Werbepartner angelegt.':'Noch keine Werbeflächen angelegt.')+'</span>')
+   +'</fieldset><hr>'
+   +'<div class="two">'+inp('d_person','Ansprechpartner',d.person)+inp('d_role','Funktion',d.role,'placeholder="z. B. Inhaber"')+'</div>'
+   +'<div class="two">'+inp('d_phone','Telefon',d.phone,'type="tel"')+inp('d_email','E-Mail',d.email,'type="email"')+'</div>'
+   +inp('d_web','Website',d.web,'placeholder="www.beispiel.de"')
+   +'<label class="f">Notiz<textarea class="inp" id="d_note" rows="3">'+esc(d.note)+'</textarea></label>'
+   +(S.error?'<div class="err" role="alert">'+esc(S.error)+'</div>':'')
+   +'<div class="two"><button type="submit" class="btn btn-blue" style="flex:2 1 160px">Speichern</button><button type="button" class="btn" id="cancelForm" style="flex:1 1 100px">Abbrechen</button></div>'
+   +(S.mode==='edit'?(S.askDelete?'<div class="confirm" role="alert">„'+esc(d.name)+'“ wirklich löschen? Das lässt sich nicht rückgängig machen.<div style="display:flex;gap:8px"><button type="button" class="btn btn-sm btn-danger" id="delYes">Endgültig löschen</button><button type="button" class="btn btn-sm" id="delNo">Behalten</button></div></div>':'<button type="button" class="btn btn-sm btn-ghost-danger" id="delBtn">Eintrag löschen</button>'):'')
+   +'</form>';
+}
+function readForm(){
+  var d=S.draft,g=function(id){var el=document.getElementById(id);return el?el.value:null;};
+  ['name','category','street','format','person','role','phone','email','web','note'].forEach(function(k){var v=g('d_'+k);if(v!==null)d[k]=v;});
+  var sl=g('d_slots');if(sl!==null)d.slots=sl;
+  var rel=[].slice.call(document.querySelectorAll('#form .rel')).filter(function(c){return c.checked;}).map(function(c){return c.value;});
+  if(d.kind==='flaeche')d.advertisers=rel;else d.flaechenIds=rel;
+}
+function bindForm(){
+  var f=document.getElementById('form');
+  var close=function(){S.mode='view';S.placing=false;S.askDelete=false;render();};
+  document.getElementById('closeForm').onclick=close;document.getElementById('cancelForm').onclick=close;
+  var k=document.getElementById('d_kind');if(k)k.onchange=function(){readForm();S.draft.kind=k.value;render();};
+  document.getElementById('d_town').onchange=function(e){readForm();S.draft.town=e.target.value;if(!S.draft.posSet){S.draft.lat=null;S.draft.lng=null;}render();};
+  var pb=document.getElementById('placeBtn');if(pb)pb.onclick=function(){readForm();S.placing=!S.placing;render();};
+  var gb=document.getElementById('geoBtn');if(gb)gb.onclick=function(){readForm();geocode();};
+  var db=document.getElementById('delBtn');if(db)db.onclick=function(){readForm();S.askDelete=true;render();};
+  var dn=document.getElementById('delNo');if(dn)dn.onclick=function(){S.askDelete=false;render();};
+  var dy=document.getElementById('delYes');if(dy)dy.onclick=doDelete;
+  f.onsubmit=function(ev){ev.preventDefault();readForm();save();};
+}
+function geocode(){
+  var d=S.draft,t=TOWNS[d.town]||{plz:''};
+  var q=[d.street,(t.plz+' '+d.town).trim(),'Deutschland'].filter(Boolean).join(', ');
+  S.geoMsg='Suche Adresse …';render();
+  fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=de&q='+encodeURIComponent(q),{headers:{'Accept-Language':'de'}})
+    .then(function(r){return r.json();})
+    .then(function(res){
+      if(res&&res[0]){S.draft.lat=+(+res[0].lat).toFixed(6);S.draft.lng=+(+res[0].lon).toFixed(6);S.draft.posSet=true;S.geoMsg='Adresse gefunden – bitte Position prüfen.';map.flyTo([S.draft.lat,S.draft.lng],16,{duration:.6});}
+      else S.geoMsg='Adresse nicht gefunden – bitte auf der Karte klicken.';
+      render();
+    }).catch(function(){S.geoMsg='Adresssuche nicht erreichbar – bitte auf der Karte klicken.';render();});
+}
+function save(){
+  var d=S.draft;
+  if(!d.name.trim()){S.error='Bitte einen Namen eingeben.';render();return;}
+  var id=d.id||('n'+Date.now());
+  var e={id:id,kind:d.kind,name:d.name.trim(),category:d.category.trim(),town:d.town,street:d.street.trim(),person:d.person.trim(),role:d.role.trim(),phone:d.phone.trim(),email:d.email.trim(),web:d.web.trim(),note:d.note.trim()};
+  if(d.kind==='flaeche'){
+    var lat=d.lat,lng=d.lng;
+    if(lat==null){var t=TOWNS[d.town],n=flaechen().filter(function(x){return x.town===d.town&&x.id!==id;}).length+1,a=n*2.4;lat=+(t.lat+Math.sin(a)*0.004).toFixed(6);lng=+(t.lng+Math.cos(a)*0.006).toFixed(6);}
+    e.lat=lat;e.lng=lng;e.format=d.format.trim();e.slots=Math.max(1,parseInt(d.slots,10)||4);e.advertisers=d.advertisers.slice();
+  }
+  var list=S.entries.slice(),idx=-1;list.forEach(function(x,i){if(x.id===id)idx=i;});
+  if(idx===-1)list.push(e);else list[idx]=e;
+  if(d.kind==='partner'){list=list.map(function(x){if(x.kind!=='flaeche')return x;var adv=(x.advertisers||[]).filter(function(a){return a!==id;});if(d.flaechenIds.indexOf(x.id)!==-1)adv.push(id);return Object.assign({},x,{advertisers:adv});});}
+  S.entries=list;persist();select(id,true);
+}
+function doDelete(){
+  var id=S.draft&&S.draft.id;if(!id)return;
+  S.entries=S.entries.filter(function(x){return x.id!==id;}).map(function(x){return x.kind==='flaeche'?Object.assign({},x,{advertisers:(x.advertisers||[]).filter(function(a){return a!==id;})}):x;});
+  persist();S.selected=null;S.mode='view';S.askDelete=false;render();
+}
+
+// ---------- Export / Import ----------
+document.getElementById('exportBtn').addEventListener('click',function(){
+  var blob=new Blob([JSON.stringify(S.entries,null,2)],{type:'application/json'});
+  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='partnerkarte-daten.json';document.body.appendChild(a);a.click();a.remove();
+});
+document.getElementById('importBtn').addEventListener('click',function(){document.getElementById('importFile').click();});
+document.getElementById('importFile').addEventListener('change',function(ev){
+  var file=ev.target.files[0];if(!file)return;var r=new FileReader();
+  r.onload=function(){try{var d=JSON.parse(r.result);if(!Array.isArray(d))throw 0;S.entries=d;persist();S.selected=null;S.mode='view';render();}catch(e){alert('Die Datei konnte nicht gelesen werden.');}ev.target.value='';};
+  r.readAsText(file);
+});
+
+// ---------- Render ----------
+function render(){renderToolbar();renderList();renderMap();renderDetail();}
+applyTheme();render();
+})();
+</script>
+</body>
+</html>

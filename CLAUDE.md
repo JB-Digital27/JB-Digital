@@ -41,4 +41,6 @@ Bildschirme hängen, wer dort wirbt und mit welchen Läden wir gerade sprechen.
 - Design-Vorlagen liegen im Ordner design/. Der Code ist die maßgebliche Version.
 
 ## Stand
-- Build 1: lokal mit Beispieldaten (Karte, Pins, Formular, Status)
+- Build 1: lokal mit Beispieldaten (Karte, Pins, Formular, Status) – umgesetzt
+  (Speicherung in localStorage über src/data/useDaten.ts, 6 Werbeplätze als Standard,
+  Ausgestiegene bleiben gespeichert und sind per Filter einblendbar)
