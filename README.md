@@ -4,6 +4,6 @@
 
 ## Projekte
 
-| Projekt | Pfad | Beschreibung |
-|---|---|---|
-| Partnerkarte | [`Partnerkarte/Design`](Partnerkarte/Design/index.html) | Interaktive Karte der Werbeflächen und Werbepartner im Kreis Gütersloh |
+| Projekt | Branch | Pfad | Beschreibung |
+|---|---|---|---|
+| Partnerkarte | [`claude-design`](https://github.com/JB-Digital27/JB-Digital/tree/claude-design/Partnerkarte/Design) | `Partnerkarte/Design` | Interaktive Karte der Werbeflächen und Werbepartner im Kreis Gütersloh |
