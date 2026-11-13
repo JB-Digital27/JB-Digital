@@ -28,6 +28,21 @@ Voraussetzung: [Node.js](https://nodejs.org) (Version 20 oder neuer) ist install
 **Am Handy testen:** `npm run dev -- --host` starten und am Handy (im selben WLAN)
 die angezeigte „Network“-Adresse öffnen.
 
+## Online öffnen (GitHub Pages)
+
+Adresse: **<https://jb-digital27.github.io/JB-Digital/>**
+
+Bei jedem Push auf `main` baut GitHub die App automatisch neu und veröffentlicht sie
+(siehe `.github/workflows/github-pages.yml`, Fortschritt unter dem Reiter „Actions“).
+
+Einmalig einschalten: Repository → **Settings** → **Pages** → bei „Source“
+**GitHub Actions** auswählen.
+
+Hinweis: Die Seite ist öffentlich erreichbar (nicht in Suchmaschinen gelistet). Das ist
+in Ordnung, solange nur Beispieldaten drin sind. Eingetragene Daten bleiben ohnehin nur
+im Browser des jeweiligen Geräts. GitHub Pages ist nur eine Übergangslösung bis zum
+endgültigen Hosting mit Login.
+
 ## Was Build 1 kann
 
 - Karte (OpenStreetMap) mit Pins, Farbe je Status:
